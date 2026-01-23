@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [[ "$1" == "build" ]]; then
+    python3 process_data.py
+    exit 0
+fi
+
+python3 -m http.server 8000

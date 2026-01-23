@@ -1,0 +1,236 @@
+/* Layout Containers */
+.body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.search-panel {
+  width: 75%;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-right: 1px solid #000000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-input {
+  color: #ffffff;
+  width: 80%;
+  padding: 0.5rem;
+  border: none;
+  /* border: 1px solid #cccccc; */
+  border-radius: 0.25rem 0 0 0.25rem;
+  font-size: 0.875rem;
+}
+
+.clear-button {
+  padding: 0.6rem 1rem;
+  background-color: #ee4b4b;
+  border: 1px solid #ee4b4b;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+
+/* height:3rem; width: 5rem; padding: 5px; border:2px solid olive; border-radius: 0 5px 5px 0; background-color: #202020; cursor: pointer; */
+
+.selection-panel {
+  width: 33.333333%;
+  padding: 2.5rem;
+  background-color: #f7fafc;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Headers & Inputs */
+.panel-header {
+  padding: 1.5rem;
+  background-color: #2f343a;
+  color: #ffffff;
+}
+
+.panel-header h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 1rem;
+}
+
+.panel-header input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  background-color: #1a1d23;
+  border: none;
+  font-size: 0.875rem;
+}
+
+/* Grid & Items */
+.results-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  gap: 2.5rem;
+}
+
+.release-group h2 {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #000000;
+  padding-bottom: 0.25rem;
+}
+
+.compiler-group {
+  margin-left: 0rem;
+  border-left: 2px solid #f7fafc;
+  padding-left: 0rem;
+  margin-bottom: 2rem;
+}
+
+.compiler-group h3 {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+@media (max-width: 80vw) {
+  .module-grid {
+    grid-template-columns: repeat(auto-fill, 1fr);
+  }
+}
+
+.module-card {
+  padding: 0.75rem;
+  border: 1px solid #9c9c9c;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  background-color: #ffffff;
+}
+
+.module-card.selected {
+  background-color: #3498db;
+  color: #ffffff;
+  border: 1px solid #3498db;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.pkg-name {
+  /* height: 1rem; */
+  font-weight: bold;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+}
+
+.pkg-ver {
+  /* height: 1rem; */
+  font-size: 0.6rem;
+  opacity: 0.7;
+  font-family: monospace;
+  margin: 0rem;
+}
+
+/* Sidebar Components */
+.sidebar-title {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.alert-box {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fef2f2;
+  border-left: 4px solid #f44336;
+  color: #f44336;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.selected-item {
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d4d4d8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.item-name {
+  font-weight: bold;
+  color: #1a1d23;
+  font-size: 0.875rem;
+}
+
+.item-meta {
+  font-size: 0.625rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.remove-btn {
+  color: #6b7280;
+  font-size: 1.25rem;
+  border: none;
+}
+
+.empty-state {
+  color: #6b7280;
+  text-align: center;
+  padding-top: 10rem;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+/* Command Output */
+.output-area {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid #d4d4d8;
+}
+
+.command-box {
+  background-color: #1a1d23;
+  color: #34c759;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-family: monospace;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.hint {
+  margin-top: 0.75rem;
+  font-size: 0.5625rem;
+  color: #6b7280;
+  text-align: center;
+}

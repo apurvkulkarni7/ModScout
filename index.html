@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lmod Resolver</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
+</head>
+
+<body class="body">
+
+    <div x-data="resolver" class="app-container">
+
+        <main class="search-panel">
+            <header class="panel-header">
+                <h1>HPC Software Stack</h1>
+
+                <div style="display: flex; align-items: center;">
+                    <input class="search-input" x-model="search" placeholder="Search modules (e.g. LLVM, Clang)...">
+                    <button type="button" class="clear-button" @click="search = ''">Clear</button>
+                </div>
+                
+            </header>
+
+            <div class="results-area">
+                <template x-for="(compilers, release) in tree" :key="release">
+                    <section x-show="releaseVisible(compilers)" class="release-group">
+                        <h2 x-text="release"></h2>
+
+                        <template
+                            x-for="(modules, compiler) in Object.fromEntries(Object.entries(compilers).sort((a, b) => a[0] === 'None' ? -1 : b[0] === 'None' ? 1 : a[0].localeCompare(b[0])))"
+                            :key="compiler">
+                            <div x-show="compilerVisible(modules)" class="compiler-group">
+                                <h3 x-text="compiler"></h3>
+                                <div class="module-grid">
+                                    <template x-for="mod in modules" :key="mod.name + mod.compiler">
+                                        <button x-show="matchesSearch(mod.name)" @click="toggleModule(mod)"
+                                            :class="{'selected': isSelected(mod)}" class="module-card">
+                                            <span class="pkg-name" x-text="mod.package"></span>
+                                            <span class="pkg-ver" x-text="mod.version"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </section>
+                </template>
+            </div>
+        </main>
+
+        <aside class="selection-panel">
+            <h2 class="sidebar-title">Selected Modules</h2>
+
+            <div x-show="hasConflict" class="alert-box">
+                <strong>Dependency Conflict</strong>
+                <p>Modules must share the same dependencies.</p>
+            </div>
+
+            <div class="selection-list">
+                <template x-for="mod in selected" :key="mod.name + mod.compiler">
+                    <div class="selected-item">
+                        <div>
+                            <div class="item-name" x-text="mod.package"></div>
+                            <div class="item-meta" x-text="mod.compiler === 'None' ? mod.release : `${mod.release} ${mod.compiler}`"></div>
+                            <div class="item-meta" x-text="`${mod.description}`"></div>
+                        </div>
+                        <button @click="toggleModule(mod)" class="remove-btn">✕</button>
+                    </div>
+                </template>
+
+                <div x-show="selected.length === 0" class="empty-state">
+                    Select modules to build command
+                </div>
+            </div>
+
+            <div x-show="selected.length > 0 && !hasConflict" class="output-area">
+                <div class="command-box" @click="copyCommand">
+                    <code x-text="combinedLoadCmd"></code>
+                </div>
+                <p class="hint">Click to copy</p>
+            </div>
+        </aside>
+
+    </div>
+</body>
+
+</html>
