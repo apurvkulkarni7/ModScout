@@ -14,6 +14,7 @@ from flask import (
 import json
 from dotenv import load_dotenv
 import schedule
+import re
 
 load_dotenv()
 
@@ -25,17 +26,18 @@ app = Flask(__name__)
 HPC_USERNAME = os.getenv("HPC_USERNAME")
 HPC_SSH_KEY = os.getenv("HPC_SSH_KEY")
 
-SYSTEMS = {
-    "barnard": {"env": "rapids", "host": "login1.barnard.hpc.tu-dresden.de"},
-    "romeo": {"env": "romeo", "host": "login1.romeo.hpc.tu-dresden.de"},
-    "alpha": {"env": "romeo", "host": "login1.alpha.hpc.tu-dresden.de"},
-    "capella": {"env": "genoa", "host": "login1.capella.hpc.tu-dresden.de"},
-}
+SYSTEMS = {}
+for key, value in os.environ.items():
+    match = re.match(r'SYSTEM_(\d+)_NAME', key)
+    if match:
+        system_index = match.group(1)
+        system_name = value
+        system_host = os.environ.get(f'SYSTEM_{system_index}_HOST')
+        SYSTEMS[system_name] = {'host': system_host}
 
-REMOTE_CMD = "source /etc/profile; $LMOD_DIR/spider -o jsonSoftwarePage $MODULEPATH"
+REMOTE_CMD = "$LMOD_DIR/spider -o jsonSoftwarePage $MODULEPATH"
 DATA_DIR = "./data"
 os.makedirs(DATA_DIR, exist_ok=True)
-
 
 DAY_MAP = {
     'monday': schedule.every().monday,
@@ -48,7 +50,6 @@ DAY_MAP = {
 }
 UPDATE_SCHEDULE = os.getenv('UPDATE_SCHEDULE')
 update_day, update_time = UPDATE_SCHEDULE.split()
-# UPDATE_SCHEDULER = 
 
 # State tracking
 JOB_STATUS = {}
@@ -59,7 +60,7 @@ for system in SYSTEMS.keys():
 # Helper Functions
 ################################################################################
 def process_data(system_name):
-    with open(os.path.join(DATA_DIR, f"module_{SYSTEMS[system_name]['env']}.json"), "r") as f:
+    with open(os.path.join(DATA_DIR, f"raw_{system_name}.json"), "r") as f:
         raw_data = json.load(f)
 
     tree = {}
@@ -103,7 +104,7 @@ def fetch_module_data(system_name):
     print(f"{str(system_name).capitalize()} system module data update started at {datetime.now()}")
 
     # for sys in SYSTEMS:
-    local_path = os.path.join(DATA_DIR, f"raw_{SYSTEMS[system_name]['env']}.json")
+    local_path = os.path.join(DATA_DIR, f"raw_{system_name}.json")
     try:
         # Native SSH call
         result = subprocess.run(
@@ -160,8 +161,7 @@ def module():
 @app.route("/module/data")
 def module_data():
     system = request.args.get("system")
-    environ_name = SYSTEMS.get(system).get("env", "rapids")
-    file_path = os.path.join(DATA_DIR, f"processed_module_{environ_name}.json")
+    file_path = os.path.join(DATA_DIR, f"processed_module_{system}.json")
     return send_file(file_path, mimetype="application/json")
 
 @app.route("/update")
