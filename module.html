@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIH HPC Module Browser</title>
+    <link rel="stylesheet" href="style_module.css">
+    <link rel="stylesheet" href="style_common.css">
+    <script src="main.js" defer></script>
+</head>
+
+<body class="body">
+    <div class="title-panel">
+        <h1>ZIH HPC Module Browser</h1>
+    </div>
+
+    <nav class="global-nav">
+        <div class="nav-links"><a href="index.html">Home</a></div>
+        <div class="nav-links"><a href="module.html?system=barnard">Barnard</a></div>
+        <div class="nav-links"><a href="module.html?system=romeo">Romeo</a></div>
+        <div class="nav-links"><a href="module.html?system=alpha">Alpha</a></div>
+        <div class="nav-links"><a href="module.html?system=capella">Capella</a></div>
+
+    </nav>
+
+    <div class="app-container">
+        <main class="search-panel">
+            <header class="panel-header">
+                <div style="display: flex; align-items: center;">
+                    <input id="searchInput" class="search-input" placeholder="Search modules or keywords (e.g. LLVM, Clang)...">
+                    <button type="button" id="clearBtn" class="clear-button" style="height: 2.5rem;">Clear</button>
+                </div>
+            </header>
+
+            <div id="resultsArea" class="results-area"></div>
+        </main>
+
+        <aside class="selection-panel">
+            <h2 class="sidebar-title">Selected Modules</h2>
+            <button id="clearSelectionBtn" class="clear-button"
+                style="padding: 1rem; margin-bottom:2rem; font-size: 0.75rem;">
+                Clear All Selection
+            </button>
+            <div id="conflictAlert" class="alert-box" style="display: none;">
+                <strong>Dependency Conflict</strong>
+                <p>Modules must share the same dependencies.</p>
+            </div>
+
+            <div id="selectionList" class="selection-list"></div>
+
+            <div id="outputArea" class="output-area" style="display: none;">
+                <div style="font-size: 1rem;margin-bottom: 1rem;">Run the following command to load the modules:</div>
+                <div id="copyCmdBox" class="command-box">
+                    <code id="commandText"></code>
+                </div>
+                <p class="hint">Click to copy</p>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 ScaDS.AI. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>
