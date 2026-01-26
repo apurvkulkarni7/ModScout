@@ -18,34 +18,23 @@ document.addEventListener("DOMContentLoaded", () => {
   async function init() {
     const urlParams = new URLSearchParams(window.location.search);
     const systemName = urlParams.get("system") || "processed_module_rapids"; // Default fallback
+    
+    updateNav();
+    
+    fetch(`/module/data?system=${systemName}`)
+      .then( res => res.json())
+      .then( data => {
+        state.tree = data;
+        document.title = `${systemName.replace(/_/g, " ").toUpperCase()} Module Browser`;
+        render();
+      })
+      .catch( e => {
+        console.error(`Failed to load module data for system: ${systemName}`, e);
+        document.getElementById("resultsArea").innerHTML = `
+              <div class="empty-state">Error: Could not load the software stack for "${systemName}".</div>
+          `;
+      })   
 
-    const environMap = {
-      barnard: "rapids",
-      romeo: "romeo",
-      alpha: "romeo",
-      capella: "genoa",
-    };
-
-    updateNav()
-
-    let environName = environMap[systemName] || "rapids";
-    const jsonFile = `data/processed_module_${environName}.json`;
-
-    try {
-      const res = await fetch(jsonFile);
-      if (!res.ok) throw new Error("File not found");
-
-      state.tree = await res.json();
-
-      document.title = `${systemName.replace(/_/g, " ").toUpperCase()} Module Browser`;
-
-      render();
-    } catch (e) {
-      console.error(`Failed to load: ${jsonFile}`, e);
-      document.getElementById("resultsArea").innerHTML = `
-            <div class="empty-state">Error: Could not load the software stack for "${systemName}" (${jsonFile}).</div>
-        `;
-    }
   }
 
   //  Logic Helpers 
@@ -188,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
       outputArea.style.display = "none";
       return;
     }
-    console.log("Selected modules:", state.selected);
+    console.debug("Selected modules:", state.selected);
 
     state.selected.forEach((mod) => {
       const item = document.createElement("div");

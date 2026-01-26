@@ -5,23 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZIH HPC Module Browser</title>
-    <link rel="stylesheet" href="style_module.css">
-    <link rel="stylesheet" href="style_common.css">
-    <script src="main.js" defer></script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_module.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_common.css') }}">
+    <!-- <script src="main.js" defer></script> -->
+
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/common.js') }}" defer></script>
 </head>
 
 <body class="body">
-    <div class="title-panel">
-        <h1>ZIH HPC Module Browser</h1>
+    <div class="title-panel header">
+         <h1>ZIH HPC Module Browser</h1>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; margin: 2rem;">
+        <!-- <button id="update-btn" class="update-btn" onclick="updateModuleData()">Update Data</button> -->
+        <div class="status" id="status-display"></div>
+        </div>
     </div>
+    
 
     <nav class="global-nav">
-        <div class="nav-links"><a href="index.html">Home</a></div>
-        <div class="nav-links"><a href="module.html?system=barnard">Barnard</a></div>
-        <div class="nav-links"><a href="module.html?system=romeo">Romeo</a></div>
-        <div class="nav-links"><a href="module.html?system=alpha">Alpha</a></div>
-        <div class="nav-links"><a href="module.html?system=capella">Capella</a></div>
-
+        <div class="nav-links"><a href="/">Home</a></div>
+        <div class="nav-links"><a href="/module?system=barnard">Barnard</a></div>
+        <div class="nav-links"><a href="/module?system=romeo">Romeo</a></div>
+        <div class="nav-links"><a href="/module?system=alpha">Alpha</a></div>
+        <div class="nav-links"><a href="/module?system=capella">Capella</a></div>
     </nav>
 
     <div class="app-container">

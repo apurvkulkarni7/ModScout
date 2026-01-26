@@ -9,7 +9,6 @@ body {
   min-height: 100vh;
 }
 
-
 .footer {
   background: #2f343a;
   color: #9ca3af;
@@ -24,4 +23,31 @@ body {
 }
 .footer b {
   color: #3498db;
+}
+
+.status {
+  margin-top: 10px;
+  font-size: 1rem;
+}
+
+.status-running {
+  color: #ff9900;
+}
+
+.status-completed {
+  color: #4caf50;
+}
+.status-error {
+  color: #f44336;
+}
+
+.last-run {
+  /* font-size: 14px; */
+  color: #666;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPC Software Stack Browser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_common.css') }}">
+    <script src="{{ url_for('static', filename='js/index.js') }}" defer></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+</head>
+<body>
+    <main class="main">
+        <h1>ZIH HPC Module Browser</h1>
+        <div>Select an HPC System to explore the modules</div>
+        <div class="main-nav-grid">
+            <a href="/module?system=barnard" class="system-card">Barnard</a>
+            <a href="/module?system=romeo" class="system-card">Romeo</a>
+            <a href="/module?system=alpha" class="system-card">Alpha</a>
+            <a href="/module?system=capella" class="system-card">Capella</a>
+        </div>
+
+        <button class="update-btn" onclick="updateModuleData()">Update Module Data</button>
+        <div class="status" id="status-display"></div>
+
+        <div class="info-section">
+            <a href="https://compendium.hpc.tu-dresden.de/software/modules/" class="info-btn">How software is organized in ZIH HPC System ?</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 ScaDS.AI. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
