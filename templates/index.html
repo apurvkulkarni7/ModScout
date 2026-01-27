@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HPC Software Stack Browser</title>
+    <title>ZIH HPC Software Browser</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_index.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_common.css') }}">
-    <script src="{{ url_for('static', filename='js/index.js') }}" defer></script>
+    <script defer src="{{ url_for('static', filename='js/common.js') }}" ></script>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
 </head>
@@ -21,16 +21,15 @@
             <a href="/module?system=capella" class="system-card">Capella</a>
         </div>
 
-        <button class="update-btn" onclick="updateModuleData()">Update Module Data</button>
         <div class="status" id="status-display"></div>
 
         <div class="info-section">
-            <a href="https://compendium.hpc.tu-dresden.de/software/modules/" class="info-btn">How software is organized in ZIH HPC System ?</a>
+            <a href="https://compendium.hpc.tu-dresden.de/software/modules/" class="info-btn">ℹ️ More information </a>
         </div>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2026 ScaDS.AI. All rights reserved.</p>
+        <p>Copyright 2026 &copy; SCADS.AI Dresden/Leipzig - All rights reserved.</p>
     </footer>
 
 </body>

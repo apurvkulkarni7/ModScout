@@ -18,54 +18,40 @@ document.addEventListener("DOMContentLoaded", () => {
   async function init() {
     const urlParams = new URLSearchParams(window.location.search);
     const systemName = urlParams.get("system") || "processed_module_rapids"; // Default fallback
-    
+
     updateNav();
-    
+
     fetch(`/module/data?system=${systemName}`)
-      .then( res => res.json())
-      .then( data => {
+      .then((res) => res.json())
+      .then((data) => {
         state.tree = data;
         document.title = `${systemName.replace(/_/g, " ").toUpperCase()} Module Browser`;
         render();
       })
-      .catch( e => {
-        console.error(`Failed to load module data for system: ${systemName}`, e);
+      .catch((e) => {
+        console.error(
+          `Failed to load module data for system: ${systemName}`,
+          e,
+        );
         document.getElementById("resultsArea").innerHTML = `
               <div class="empty-state">Error: Could not load the software stack for "${systemName}".</div>
           `;
-      })   
-
+      });
   }
 
-  //  Logic Helpers 
+  //  Logic Helpers
   function render() {
     renderResults();
     renderSelection();
   }
 
-  function getSearchTerms() {
-    return state.search
-      .toLowerCase()
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s);
-  }
-
-  function matchesSearch(mod) {
-    const terms = getSearchTerms();
-    if (terms.length === 0) return true;
-
-    const name = (mod.name || "").toLowerCase();
-    const description = (mod.description || "").toLowerCase();
-
-    return terms.some(
-      (term) => name.includes(term) || description.includes(term),
-    );
-  }
 
   function isSelected(mod) {
     return state.selected.some(
-      (m) => m.name === mod.name && m.compiler === mod.compiler && m.release === mod.release,
+      (m) =>
+        m.name === mod.name &&
+        m.compiler === mod.compiler &&
+        m.release === mod.release,
     );
   }
 
@@ -74,33 +60,53 @@ document.addEventListener("DOMContentLoaded", () => {
     const getRootCompiler = (m) => m.compiler.split(" ")[0];
     const getRelease = (m) => m.release.split(" ")[0];
 
-    const differentRelease = state.selected.some((m) => getRelease(m) !== getRelease(state.selected[0]));
-    console.debug("Checking if any selected module has a different release:", differentRelease);
+    const differentRelease = state.selected.some(
+      (m) => getRelease(m) !== getRelease(state.selected[0]),
+    );
+    console.debug(
+      "Checking if any selected module has a different release:",
+      differentRelease,
+    );
     if (differentRelease) {
-      console.debug("Selected modules have different releases. Conflict detected.");
+      console.debug(
+        "Selected modules have different releases. Conflict detected.",
+      );
       return true;
     }
-    
-    const pkgsWithCompiler = state.selected.filter((m) => getRootCompiler(m) !== "");
+
+    const pkgsWithCompiler = state.selected.filter(
+      (m) => getRootCompiler(m) !== "",
+    );
     if (pkgsWithCompiler.length === 0) {
-      console.debug("All selected modules have 'None' dependency. No conflict.");
+      console.debug(
+        "All selected modules have 'None' dependency. No conflict.",
+      );
       return false;
     } else if (pkgsWithCompiler.length === 1) {
-      console.debug("Only one selected module has a specific compiler. No conflict in dependency.");
+      console.debug(
+        "Only one selected module has a specific compiler. No conflict in dependency.",
+      );
       return false;
     } else {
-      console.debug("Multiple selected modules have specific compilers. Checking for conflicts in dependency.");
+      console.debug(
+        "Multiple selected modules have specific compilers. Checking for conflicts in dependency.",
+      );
       var rootSubsetCompiler = getRootCompiler(pkgsWithCompiler[0]);
-      const differentCompiler = pkgsWithCompiler.some((m) => getRootCompiler(m) && getRootCompiler(m) !== rootSubsetCompiler);
+      const differentCompiler = pkgsWithCompiler.some(
+        (m) => getRootCompiler(m) && getRootCompiler(m) !== rootSubsetCompiler,
+      );
       return differentCompiler;
     }
   }
 
   // Actions
 
-  function toggleModule(mod) { 
+  function toggleModule(mod) {
     const idx = state.selected.findIndex(
-      (m) => m.name === mod.name && m.compiler === mod.compiler && m.release === mod.release,
+      (m) =>
+        m.name === mod.name &&
+        m.compiler === mod.compiler &&
+        m.release === mod.release,
     );
 
     console.debug("Toggling module:", mod, "Index in selected:", idx);
@@ -119,52 +125,60 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Rendering Logic
-
   function renderResults() {
-    resultsArea.innerHTML = "";
+    const query = state.search;
+    const urlParams = new URLSearchParams(window.location.search);
+    const systemName = urlParams.get("system");
+    fetch(`/module/search?system=${systemName}&query=${query}`)
+      .then((response) => response.json())
+      .then((data) => {
+        resultsArea.innerHTML = "";
+        const sortedReleases_key = Object.keys(data).sort().reverse();
+        const sortedReleases = sortedReleases_key.map((key) => [key, data[key]]);
 
-    Object.entries(state.tree).forEach(([release, compilers]) => {
-      // Updated to pass the full module object to the match function
-      const filteredCompilers = Object.entries(compilers).filter(
-        ([compiler, modules]) => {
-          return modules.some((m) => matchesSearch(m));
-        },
-      );
+        sortedReleases.forEach(release_item => {
+            const release = release_item[0];
+            const compiler = release_item[1];
+            
+            const section = document.createElement("section");
+            section.className = "release-group";
+            section.innerHTML = `<h2>${release}</h2>`;
 
-      if (filteredCompilers.length === 0) return;
+            const sortedCompilers_key = Object.keys(compiler).sort((a, b) => {
+              if (a.toLowerCase() === "none" || a.trim() === "") return -1;
+              if (b.toLowerCase() === "none" || b.trim() === "") return 1;
+              return a.localeCompare(b);
+            });
+            const sortedCompilerEntries = sortedCompilers_key.map((key) => [key, compiler[key]]);
 
-      const section = document.createElement("section");
-      section.className = "release-group";
-      section.innerHTML = `<h2>${release}</h2>`;
+            sortedCompilerEntries.forEach((compiler_item) => {
+              let compiler = compiler_item[0];
+              const modules = compiler_item[1];
 
-      filteredCompilers.sort((a, b) =>
-        a[0] === "None" ? -1 : b[0] === "None" ? 1 : a[0].localeCompare(b[0]),
-      );
+              if (compiler.toLowerCase() === "none" || compiler.trim() === "") {
+                compiler = "Standalone";
+              }
 
-      filteredCompilers.forEach(([compiler, modules]) => {
-        const group = document.createElement("div");
-        group.className = "compiler-group";
-        group.innerHTML = `<h3>${compiler}</h3>`;
+              const group = document.createElement("div");
+              group.className = "compiler-group";
+              group.innerHTML = `<h3>${compiler}</h3>`;
 
-        const grid = document.createElement("div");
-        grid.className = "module-grid";
+              const grid = document.createElement("div");
+              grid.className = "module-grid";
+              modules.forEach((mod) => {
+                const btn = document.createElement("button");
+                btn.className = `module-card ${isSelected(mod) ? "selected" : ""}`;
+                btn.innerHTML = `<span class="pkg-name">${mod.package}</span><span class="pkg-ver">${mod.version}</span>`;
+                btn.onclick = () => toggleModule(mod);
+                grid.appendChild(btn);
+              });
 
-        modules.sort((a, b) => a.package.localeCompare(b.package));
-
-        modules.forEach((mod) => {
-          if (!matchesSearch(mod)) return;
-          const btn = document.createElement("button");
-          btn.className = `module-card ${isSelected(mod) ? "selected" : ""}`;
-          btn.innerHTML = `<span class="pkg-name">${mod.package}</span><span class="pkg-ver">${mod.version}</span>`;
-          btn.onclick = () => toggleModule(mod);
-          grid.appendChild(btn);
-        });
-
-        group.appendChild(grid);
-        section.appendChild(group);
+              group.appendChild(grid);
+              section.appendChild(group);
+            });
+            resultsArea.appendChild(section);
+          });
       });
-      resultsArea.appendChild(section);
-    });
   }
 
   function renderSelection() {
@@ -183,9 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const item = document.createElement("div");
       item.className = "selected-item";
       const meta =
-        mod.compiler === ""
-          ? mod.release
-          : `${mod.release} ${mod.compiler}`;
+        mod.compiler === "" ? mod.release : `${mod.release} ${mod.compiler}`;
       item.innerHTML = `
                 <div style="align-items: left;">
                     <div class="item-name">${mod.package}/${mod.version}</div>
@@ -224,9 +236,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Event Listeners 
+  // Event Listeners
+  // render results for each typed word
   searchInput.addEventListener("input", (e) => {
-    state.search = e.target.value;
+    state.search = e.target.value.trim();
     render();
   });
 

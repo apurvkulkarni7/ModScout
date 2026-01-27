@@ -5,24 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZIH HPC Module Browser</title>
-    
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_module.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_common.css') }}">
-    <!-- <script src="main.js" defer></script> -->
-
-    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/common.js') }}" defer></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <script defer src="{{ url_for('static', filename='js/main.js') }}" ></script>
+    <script defer src="{{ url_for('static', filename='js/common.js') }}" ></script>
 </head>
 
 <body class="body">
     <div class="title-panel header">
-         <h1>ZIH HPC Module Browser</h1>
+        <h1>ZIH HPC Module Browser</h1>
         <div style="display: flex; flex-direction: column; align-items: flex-end; margin: 2rem;">
-        <!-- <button id="update-btn" class="update-btn" onclick="updateModuleData()">Update Data</button> -->
-        <div class="status" id="status-display"></div>
+            <div class="status" id="status-display"></div>
         </div>
     </div>
-    
+
 
     <nav class="global-nav">
         <div class="nav-links"><a href="/">Home</a></div>
@@ -36,7 +34,8 @@
         <main class="search-panel">
             <header class="panel-header">
                 <div style="display: flex; align-items: center;">
-                    <input id="searchInput" class="search-input" placeholder="Search modules or keywords (e.g. LLVM, Clang)...">
+                    <input id="searchInput" class="search-input"
+                        placeholder="Search modules or keywords (e.g. LLVM, Clang)...">
                     <button type="button" id="clearBtn" class="clear-button" style="height: 2.5rem;">Clear</button>
                 </div>
             </header>
@@ -68,7 +67,7 @@
     </div>
 
     <footer class="footer">
-        <p>&copy; 2026 ScaDS.AI. All rights reserved.</p>
+        <p>Copyright 2026 &copy; SCADS.AI Dresden/Leipzig - All rights reserved.</p>
     </footer>
 </body>
 
