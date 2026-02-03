@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZIH HPC Module Browser</title>
+    <title>ModScout</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_module.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_common.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <script defer src="{{ url_for('static', filename='js/main.js') }}" ></script>
-    <script defer src="{{ url_for('static', filename='js/common.js') }}" ></script>
+    <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/common.js') }}"></script>
 </head>
 
 <body class="body">
     <div class="title-panel header">
-        <h1>ZIH HPC Module Browser</h1>
+        <h1>ModScout: Lmod Browser</h1>
         <div style="display: flex; flex-direction: column; align-items: flex-end; margin: 2rem;">
             <div class="status" id="status-display"></div>
         </div>
@@ -50,18 +50,28 @@
                 Clear All Selection
             </button>
             <div id="conflictAlert" class="alert-box" style="display: none;">
-                <strong>Dependency Conflict</strong>
-                <p>Modules must share the same dependencies.</p>
+                <div style="margin-bottom:10px;"><strong>Error!</strong></div>
+                <div id="errorMsgModuleSelection"></div>
+            </div>
+            <div id="conflictSuggestions" class="suggestions-box" style="display: none;">
+                <div style="margin-bottom:10px;"><strong>Suggestions</strong></div>
+                <div id="suggestionsMsg"></div>
             </div>
 
             <div id="selectionList" class="selection-list"></div>
 
-            <div id="outputArea" class="output-area" style="display: none;">
-                <div style="font-size: 1rem;margin-bottom: 1rem;">Run the following command to load the modules:</div>
-                <div id="copyCmdBox" class="command-box">
-                    <code id="commandText"></code>
+            <div id="hint" class="hint" style="display: block; font-size: small; margin-top: auto; margin-bottom: 0;">
+
+                <div id="outputArea" class="output-area" style="display: none;">
+                    <div style="font-size: 1rem;margin-bottom: 1rem;">Run the following command to load the modules:
+                    </div>
+                    <div id="copyCmdBox" class="command-box">
+                        <code id="commandText"></code>
+                    </div>
+                    <p class="hint">Click to copy</p>
                 </div>
-                <p class="hint">Click to copy</p>
+                Hint: Some modules require <strong>release</strong> and <strong>GCC</strong>/<strong>GCCore</strong> to
+                be loaded first.
             </div>
         </aside>
     </div>

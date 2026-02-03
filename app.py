@@ -15,6 +15,9 @@ import json
 from dotenv import load_dotenv
 import schedule
 import re
+import pprint
+from itertools import combinations
+from utils import recommendations, has_conflict
 
 load_dotenv()
 
@@ -23,6 +26,8 @@ app = Flask(__name__)
 ################################################################################
 # Configuration
 ################################################################################
+APP_PORT = int(os.getenv("APP_PORT", 8000))
+
 HPC_USERNAME = os.getenv("HPC_USERNAME")
 HPC_SSH_KEY = os.getenv("HPC_SSH_KEY")
 
@@ -164,6 +169,67 @@ def background_scheduler():
             print(f"Error in background_scheduler: {e}")
 
 
+
+def search(data, query):
+    filtered_data = {}
+
+    if query is None or query == "":
+        filtered_data = data
+
+    # Split and clean queries
+    search_queries = [q.strip() for q in query.split(",") if q.strip()]
+
+    for search_query in search_queries:
+        search_query_lower = search_query.lower()
+
+        # Parse package and version if "/" is present
+        package_query, version_query = None, None
+        if "/" in search_query:
+            parts = search_query_lower.split("/", 1)
+            package_query = parts[0]
+            version_query = parts[1] if len(parts) > 1 else ""
+
+        for release, compilers in data.items():
+            for compiler, modules in compilers.items():
+                filtered_modules = []
+
+                for mod in modules:
+                    mod_pkg = mod.get("package", "").lower()
+                    mod_ver = mod.get("version", "").lower()
+                    mod_desc = mod.get("description", "").lower()
+
+                    # If "package/version" format used
+                    if package_query is not None:
+                        if package_query in mod_pkg and version_query in mod_ver:
+                            filtered_modules.append(mod)
+                    # Generic search in package or description
+                    elif (
+                        search_query_lower in mod_pkg or search_query_lower in mod_desc
+                    ):
+                        filtered_modules.append(mod)
+
+                if filtered_modules:
+                    # Initialize nested dicts safely
+                    if release not in filtered_data:
+                        filtered_data[release] = {}
+                    if compiler not in filtered_data[release]:
+                        filtered_data[release][compiler] = []
+
+                    # Prevent duplicate modules if multiple queries match the same thing
+                    for m in filtered_modules:
+                        if m not in filtered_data[release][compiler]:
+                            filtered_data[release][compiler].append(m)
+    # sorted_releases = sorted(filtered_data.keys(), reverse=True)
+    # final_response = {}
+    # for rel in sorted_releases:
+    #     compilers = filtered_data[rel]
+    #     none_compilers = [c for c in compilers.keys() if c.strip().lower() == "none" or c.strip() == ""]
+    #     other_compilers = [c for c in compilers.keys() if c not in none_compilers]
+    #     sorted_compilers = none_compilers + sorted(other_compilers)
+    #     final_response[rel] = {c: compilers[c] for c in sorted_compilers}
+    return filtered_data
+
+
 ################################################################################
 # Routes
 ################################################################################
@@ -207,69 +273,28 @@ def get_status():
 @app.route("/module/search", methods=["GET"])
 def search_module():
     system = request.args.get("system")
-    search_query_input = request.args.get("query", "")
+    search_query = request.args.get("query", "")
     data = get_data_dictionary(system)
-    filtered_data = {}
 
-    if search_query_input is None or search_query_input == "":
-        filtered_data = data
-
-    # Split and clean queries
-    search_queries = [q.strip() for q in search_query_input.split(",") if q.strip()]
-
-    for search_query in search_queries:
-        search_query_lower = search_query.lower()
-
-        # Parse package and version if "/" is present
-        package_query, version_query = None, None
-        if "/" in search_query:
-            parts = search_query_lower.split("/", 1)
-            package_query = parts[0]
-            version_query = parts[1] if len(parts) > 1 else ""
-
-        for release, compilers in data.items():
-            for compiler, modules in compilers.items():
-                filtered_modules = []
-
-                for mod in modules:
-                    mod_pkg = mod.get("package", "").lower()
-                    mod_ver = mod.get("version", "").lower()
-                    mod_desc = mod.get("description", "").lower()
-
-                    # If "package/version" format used
-                    if package_query is not None:
-                        if package_query in mod_pkg and version_query in mod_ver:
-                            filtered_modules.append(mod)
-                    # Generic search in package or description
-                    elif (
-                        search_query_lower in mod_pkg or search_query_lower in mod_desc
-                    ):
-                        filtered_modules.append(mod)
-
-                if filtered_modules:
-                    # Initialize nested dicts safely
-                    if release not in filtered_data:
-                        filtered_data[release] = {}
-                    if compiler not in filtered_data[release]:
-                        filtered_data[release][compiler] = []
-
-                    # Prevent duplicate modules if multiple queries match the same thing
-                    for m in filtered_modules:
-                        if m not in filtered_data[release][compiler]:
-                            filtered_data[release][compiler].append(m)
-
-    # sorted_releases = sorted(filtered_data.keys(), reverse=True)
-    # final_response = {}
-    # for rel in sorted_releases:
-    #     compilers = filtered_data[rel]
-    #     none_compilers = [c for c in compilers.keys() if c.strip().lower() == "none" or c.strip() == ""]
-    #     other_compilers = [c for c in compilers.keys() if c not in none_compilers]
-    #     sorted_compilers = none_compilers + sorted(other_compilers)
-    #     final_response[rel] = {c: compilers[c] for c in sorted_compilers}
+    filtered_data = search(data, search_query)
     return jsonify(filtered_data)
+
+
+@app.route("/module/conflict", methods=["POST"])
+def conflict_check():
+    data = request.get_json(force=True)
+    selected_modules = data.get('selected',[])
+    conflict, msg = has_conflict(selected_modules)
+
+    if conflict:
+        all_modules = get_data_dictionary(system='barnard')
+        suggestions = recommendations(selected_modules,all_modules)
+    else:
+        suggestions = {}
+    return jsonify({"conflict": conflict, "msg": msg, "suggestions": suggestions})
 
 
 if __name__ == "__main__":
     scheduler_thread = threading.Thread(target=background_scheduler, daemon=True)
     scheduler_thread.start()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=APP_PORT)

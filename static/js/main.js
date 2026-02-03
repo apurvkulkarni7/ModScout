@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultsArea = document.getElementById("resultsArea");
   const selectionList = document.getElementById("selectionList");
   const conflictAlert = document.getElementById("conflictAlert");
+  const conflictSuggestions = document.getElementById("conflictSuggestions");
+  const errorModuleSelection = document.getElementById('errorMsgModuleSelection');
   const outputArea = document.getElementById("outputArea");
   const commandText = document.getElementById("commandText");
   const clearSelectionBtn = document.getElementById("clearSelectionBtn");
@@ -25,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((res) => res.json())
       .then((data) => {
         state.tree = data;
-        document.title = `${systemName.replace(/_/g, " ").toUpperCase()} Module Browser`;
+        document.title += `: ${systemName.replace(/_/g, " ").toUpperCase()}`;
         render();
       })
       .catch((e) => {
@@ -45,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderSelection();
   }
 
-
   function isSelected(mod) {
     return state.selected.some(
       (m) =>
@@ -55,50 +56,17 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  function hasConflict() {
-    if (state.selected.length < 2) return false;
-    const getRootCompiler = (m) => m.compiler.split(" ")[0];
-    const getRelease = (m) => m.release.split(" ")[0];
-
-    const differentRelease = state.selected.some(
-      (m) => getRelease(m) !== getRelease(state.selected[0]),
-    );
-    console.debug(
-      "Checking if any selected module has a different release:",
-      differentRelease,
-    );
-    if (differentRelease) {
-      console.debug(
-        "Selected modules have different releases. Conflict detected.",
-      );
-      return true;
-    }
-
-    const pkgsWithCompiler = state.selected.filter(
-      (m) => getRootCompiler(m) !== "",
-    );
-    if (pkgsWithCompiler.length === 0) {
-      console.debug(
-        "All selected modules have 'None' dependency. No conflict.",
-      );
-      return false;
-    } else if (pkgsWithCompiler.length === 1) {
-      console.debug(
-        "Only one selected module has a specific compiler. No conflict in dependency.",
-      );
-      return false;
-    } else {
-      console.debug(
-        "Multiple selected modules have specific compilers. Checking for conflicts in dependency.",
-      );
-      var rootSubsetCompiler = getRootCompiler(pkgsWithCompiler[0]);
-      const differentCompiler = pkgsWithCompiler.some(
-        (m) => getRootCompiler(m) && getRootCompiler(m) !== rootSubsetCompiler,
-      );
-      return differentCompiler;
-    }
+  async function hasConflict(selectedModules) {
+    const resp = await fetch('/module/conflict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ selected: selectedModules })
+    });
+    const data = await resp.json();
+    console.debug("Conflict check response:", data);
+    return data;
   }
-
+  
   // Actions
 
   function toggleModule(mod) {
@@ -109,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         m.release === mod.release,
     );
 
-    console.debug("Toggling module:", mod, "Index in selected:", idx);
+    // console.debug("Toggling module:", mod, "Index in selected:", idx);
 
     if (idx > -1) {
       state.selected.splice(idx, 1);
@@ -124,6 +92,38 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   }
 
+function buildSuggestionsMessage(suggestions_parsed) {
+  const total = suggestions_parsed.length;
+
+  // Group items by `release`
+  const byRelease = suggestions_parsed.reduce(
+    (acc, rec) => {
+    const rel = rec.release || "Unknown Release";
+    if (!acc[rel]) acc[rel] = [];
+    acc[rel].push({ ...rec });
+    return acc;
+  }, {});
+
+  
+  let msg = `<div> Found ${total} suggestions:</div>`;
+  let globalIdx = 1;
+  for (const [release, items] of Object.entries(byRelease)) {
+    msg += `<div><strong>${release}</strong>:</div>`;
+    items.forEach(item => {
+      // msg += `<div>${globalIdx}) ${item.packages.join(', ')}</div>`;
+      msg += `<div class="pkg-item" 
+                   data-pkg="${item.load_cmd}" 
+                   style="cursor: pointer;margin: 5px 0;" 
+                   title="Click to copy loading command:\n${item.load_cmd}">
+                   ${globalIdx}) ${item.packages.join(', ')}
+              </div>`;
+      globalIdx++;
+    });
+    msg += '<br>';
+  }
+  return msg;
+}
+
   // Rendering Logic
   function renderResults() {
     const query = state.search;
@@ -134,64 +134,71 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((data) => {
         resultsArea.innerHTML = "";
         const sortedReleases_key = Object.keys(data).sort().reverse();
-        const sortedReleases = sortedReleases_key.map((key) => [key, data[key]]);
+        const sortedReleases = sortedReleases_key.map((key) => [
+          key,
+          data[key],
+        ]);
 
-        sortedReleases.forEach(release_item => {
-            const release = release_item[0];
-            const compiler = release_item[1];
-            
-            const section = document.createElement("section");
-            section.className = "release-group";
-            section.innerHTML = `<h2>${release}</h2>`;
+        sortedReleases.forEach((release_item) => {
+          const release = release_item[0];
+          const compiler = release_item[1];
 
-            const sortedCompilers_key = Object.keys(compiler).sort((a, b) => {
-              if (a.toLowerCase() === "none" || a.trim() === "") return -1;
-              if (b.toLowerCase() === "none" || b.trim() === "") return 1;
-              return a.localeCompare(b);
-            });
-            const sortedCompilerEntries = sortedCompilers_key.map((key) => [key, compiler[key]]);
+          const section = document.createElement("section");
+          section.className = "release-group";
+          section.innerHTML = `<h2>${release}</h2>`;
 
-            sortedCompilerEntries.forEach((compiler_item) => {
-              let compiler = compiler_item[0];
-              const modules = compiler_item[1];
-
-              if (compiler.toLowerCase() === "none" || compiler.trim() === "") {
-                compiler = "Standalone";
-              }
-
-              const group = document.createElement("div");
-              group.className = "compiler-group";
-              group.innerHTML = `<h3>${compiler}</h3>`;
-
-              const grid = document.createElement("div");
-              grid.className = "module-grid";
-              modules.forEach((mod) => {
-                const btn = document.createElement("button");
-                btn.className = `module-card ${isSelected(mod) ? "selected" : ""}`;
-                btn.innerHTML = `<span class="pkg-name">${mod.package}</span><span class="pkg-ver">${mod.version}</span>`;
-                btn.onclick = () => toggleModule(mod);
-                grid.appendChild(btn);
-              });
-
-              group.appendChild(grid);
-              section.appendChild(group);
-            });
-            resultsArea.appendChild(section);
+          const sortedCompilers_key = Object.keys(compiler).sort((a, b) => {
+            if (a.toLowerCase() === "none" || a.trim() === "") return -1;
+            if (b.toLowerCase() === "none" || b.trim() === "") return 1;
+            return a.localeCompare(b);
           });
+          const sortedCompilerEntries = sortedCompilers_key.map((key) => [
+            key,
+            compiler[key],
+          ]);
+
+          sortedCompilerEntries.forEach((compiler_item) => {
+            let compiler = compiler_item[0];
+            const modules = compiler_item[1];
+
+            if (compiler.toLowerCase() === "none" || compiler.trim() === "") {
+              compiler = "Standalone";
+            }
+
+            const group = document.createElement("div");
+            group.className = "compiler-group";
+            group.innerHTML = `<h3>${compiler}</h3>`;
+
+            const grid = document.createElement("div");
+            grid.className = "module-grid";
+            modules.forEach((mod) => {
+              const btn = document.createElement("button");
+              btn.className = `module-card ${isSelected(mod) ? "selected" : ""}`;
+              btn.innerHTML = `<span class="pkg-name">${mod.package}</span><span class="pkg-ver">${mod.version}</span>`;
+              btn.onclick = () => toggleModule(mod);
+              grid.appendChild(btn);
+            });
+
+            group.appendChild(grid);
+            section.appendChild(group);
+          });
+          resultsArea.appendChild(section);
+        });
       });
   }
 
-  function renderSelection() {
+  async function renderSelection() {
     selectionList.innerHTML = "";
 
     if (state.selected.length === 0) {
       selectionList.innerHTML =
         '<div class="empty-state">Select modules to build command</div>';
       conflictAlert.style.display = "none";
+      conflictSuggestions.style.display = "none";
       outputArea.style.display = "none";
       return;
     }
-    console.debug("Selected modules:", state.selected);
+    // console.debug("Selected modules:", state.selected);
 
     state.selected.forEach((mod) => {
       const item = document.createElement("div");
@@ -211,11 +218,22 @@ document.addEventListener("DOMContentLoaded", () => {
       selectionList.appendChild(item);
     });
 
-    const conflict = hasConflict();
+    const {conflict: conflict,msg: conflict_msg, suggestions:suggestions} = await hasConflict(state.selected);
+    // console.debug("Conflict status:", conflict);
+    // console.debug("Conflict message:", conflict_msg);
+    console.debug(suggestions)
     conflictAlert.style.display = conflict ? "block" : "none";
-    outputArea.style.display =
-      !conflict && state.selected.length > 0 ? "block" : "none";
+    errorModuleSelection.innerText = conflict_msg;
 
+    // console.debug("Suggestions:", suggestions);
+    successfullResolution = suggestions.success;
+    conflictSuggestions.style.display = conflict ? "block" : "none";
+    if (conflict) {
+    const suggestions_msg = buildSuggestionsMessage(suggestions.suggestions_parsed);
+    conflictSuggestions.innerHTML = suggestions_msg;
+    }
+    outputArea.style.display = !conflict && state.selected.length > 0 ? "block" : "none";
+    
     if (!conflict && state.selected.length > 0) {
       const { release, compiler } = state.selected[0];
       const names = state.selected.map((m) => m.name).join(" ");
@@ -253,6 +271,34 @@ document.addEventListener("DOMContentLoaded", () => {
     navigator.clipboard.writeText(commandText.textContent);
     alert("Command copied to clipboard!");
   });
+
+  document.addEventListener('click', function(event) {
+  const target = event.target.closest('.pkg-item');
+
+  // If a pkg-item was clicked
+  if (target) {
+    const cmdToCopy = target.getAttribute('data-pkg');
+
+    if (cmdToCopy) {
+      // Copy to clipboard
+      navigator.clipboard.writeText(cmdToCopy).then(() => {
+        console.log('Copied to clipboard:', cmdToCopy);
+        
+        // Visual feedback
+        alert(`Copied loading command to clipboard:\n${cmdToCopy}`);
+        const originalBg = target.style.backgroundColor;
+        target.style.backgroundColor = '#9df3b1';
+        setTimeout(() => {
+           target.style.backgroundColor = originalBg;
+        }, 1000);
+        
+
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+  }
+});
 
   clearSelectionBtn.addEventListener("click", clearAllSelections);
 

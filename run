@@ -1,12 +1,72 @@
 #!/usr/bin/env bash
 
-# if [[ "$1" == "build" ]]; then
-#     python3 process_data.py
-#     exit 0
-# fi
+set -euo pipefail
 
-# python3 -m http.server 8000
+usage() {
+  echo "Usage: $0 [command] [options]"
+  echo "Commands (default: start development):"
+  echo "  start development   - run Flask app locally (python app.py)"
+  echo "  start production    - run with gunicorn (production mode)"
+  echo "  update              - if app is running, call /api/update"
+  exit 1
+}
 
-source venv/bin/activate
+source .env
 
-python3 app.py
+APP_PORT=${APP_PORT:-8000}
+
+if [[ ! -d "venv" ]] || [[ ! -f "venv/bin/activate" ]]; then
+    echo "Virtual environment not found. Creating..."
+    python3 -m venv venv
+    source venv/bin/activate
+else
+    echo "Activating virtual environment..."
+    source venv/bin/activate
+fi
+
+if [[ -f "requirements.txt" ]]; then
+  pip install -r requirements.txt > /dev/null  
+  echo "Dependencies installed..."
+fi
+
+case "${1:-}" in
+  help|--help|-h)
+    usage
+    ;;
+  start)
+    case "${2:-}" in
+      development)
+        echo "Starting development server (Flask)..."
+        python3 app.py
+        ;;
+      production)
+        echo "Starting production server (gunicorn)..."
+        if ! command -v gunicorn >/dev/null 2>&1; then
+          echo "gunicorn not found..."
+          exit 1
+        fi
+        gunicorn --workers 1 --bind 0.0.0.0:8000 wsgi:app
+        ;;
+      *)
+        usage
+        ;;
+    esac
+    ;;
+  update)
+    if ss -ltn | awk '{print $4}' | grep -q ":${APP_PORT}$"; then
+      echo "App detected on port ${APP_PORT}. Triggering update endpoint..."
+      curl -s -X GET "http://127.0.0.1:${APP_PORT}/update" \
+        || echo "Failed to call update endpoint."
+    else
+      echo "No app instance appears to be running on port ${APP_PORT}."
+    fi
+    ;;
+  "")
+    # No arguments → default to “start development”
+    echo "No command supplied - defaulting to development mode."
+    python3 app.py
+    ;;
+  *)
+    usage
+    ;;
+esac
