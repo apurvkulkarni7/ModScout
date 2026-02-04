@@ -1,3 +1,5 @@
+@import url('./style_base.css');
+
 body {
   width: 100vw;
   height: 100vh;
@@ -10,7 +12,7 @@ body {
 }
 
 .footer {
-  background: #2f343a;
+  background: var(--footer-bg-color);
   color: #9ca3af;
   /* padding: 1rem; */
   margin-top: auto;

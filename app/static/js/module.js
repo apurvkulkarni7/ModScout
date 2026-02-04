@@ -12,7 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const selectionList = document.getElementById("selectionList");
   const conflictAlert = document.getElementById("conflictAlert");
   const conflictSuggestions = document.getElementById("conflictSuggestions");
-  const errorModuleSelection = document.getElementById('errorMsgModuleSelection');
+  const errorModuleSelection = document.getElementById(
+    "errorMsgModuleSelection",
+  );
   const outputArea = document.getElementById("outputArea");
   const commandText = document.getElementById("commandText");
   const clearSelectionBtn = document.getElementById("clearSelectionBtn");
@@ -57,16 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function hasConflict(selectedModules) {
-    const resp = await fetch('/module/conflict', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ selected: selectedModules })
+    const resp = await fetch("/module/conflict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ selected: selectedModules }),
     });
     const data = await resp.json();
     console.debug("Conflict check response:", data);
     return data;
   }
-  
+
   // Actions
 
   function toggleModule(mod) {
@@ -92,37 +94,35 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   }
 
-function buildSuggestionsMessage(suggestions_parsed) {
-  const total = suggestions_parsed.length;
+  function buildSuggestionsMessage(suggestions_parsed) {
+    const total = suggestions_parsed.length;
 
-  // Group items by `release`
-  const byRelease = suggestions_parsed.reduce(
-    (acc, rec) => {
-    const rel = rec.release || "Unknown Release";
-    if (!acc[rel]) acc[rel] = [];
-    acc[rel].push({ ...rec });
-    return acc;
-  }, {});
+    // Group items by `release`
+    const byRelease = suggestions_parsed.reduce((acc, rec) => {
+      const rel = rec.release || "Unknown Release";
+      if (!acc[rel]) acc[rel] = [];
+      acc[rel].push({ ...rec });
+      return acc;
+    }, {});
 
-  
-  let msg = `<div> Found ${total} suggestions:</div>`;
-  let globalIdx = 1;
-  for (const [release, items] of Object.entries(byRelease)) {
-    msg += `<div><strong>${release}</strong>:</div>`;
-    items.forEach(item => {
-      // msg += `<div>${globalIdx}) ${item.packages.join(', ')}</div>`;
-      msg += `<div class="pkg-item" 
+    let msg = `<div> Found ${total} suggestions:</div>`;
+    let globalIdx = 1;
+    for (const [release, items] of Object.entries(byRelease)) {
+      msg += `<div><strong>${release}</strong>:</div>`;
+      items.forEach((item) => {
+        // msg += `<div>${globalIdx}) ${item.packages.join(', ')}</div>`;
+        msg += `<div class="pkg-item" 
                    data-pkg="${item.load_cmd}" 
                    style="cursor: pointer;margin: 5px 0;" 
                    title="Click to copy loading command:\n${item.load_cmd}">
-                   ${globalIdx}) ${item.packages.join(', ')}
+                   ${globalIdx}) ${item.packages.join(", ")}
               </div>`;
-      globalIdx++;
-    });
-    msg += '<br>';
+        globalIdx++;
+      });
+      msg += "<br>";
+    }
+    return msg;
   }
-  return msg;
-}
 
   // Rendering Logic
   function renderResults() {
@@ -146,6 +146,7 @@ function buildSuggestionsMessage(suggestions_parsed) {
           const section = document.createElement("section");
           section.className = "release-group";
           section.innerHTML = `<h2>${release}</h2>`;
+          // section.innerHTML = `<summary style="cursor: pointer; font-weight: bold;"><h2>${release}</h2></summary>`;
 
           const sortedCompilers_key = Object.keys(compiler).sort((a, b) => {
             if (a.toLowerCase() === "none" || a.trim() === "") return -1;
@@ -181,7 +182,9 @@ function buildSuggestionsMessage(suggestions_parsed) {
 
             group.appendChild(grid);
             section.appendChild(group);
+            
           });
+          // section.innerHTML = `<details ${true ? 'open' : ''}>${section.innerHTML}</details>`;
           resultsArea.appendChild(section);
         });
       });
@@ -218,10 +221,14 @@ function buildSuggestionsMessage(suggestions_parsed) {
       selectionList.appendChild(item);
     });
 
-    const {conflict: conflict,msg: conflict_msg, suggestions:suggestions} = await hasConflict(state.selected);
+    const {
+      conflict: conflict,
+      msg: conflict_msg,
+      suggestions: suggestions,
+    } = await hasConflict(state.selected);
     // console.debug("Conflict status:", conflict);
     // console.debug("Conflict message:", conflict_msg);
-    console.debug(suggestions)
+    console.debug(suggestions);
     conflictAlert.style.display = conflict ? "block" : "none";
     errorModuleSelection.innerText = conflict_msg;
 
@@ -229,11 +236,14 @@ function buildSuggestionsMessage(suggestions_parsed) {
     successfullResolution = suggestions.success;
     conflictSuggestions.style.display = conflict ? "block" : "none";
     if (conflict) {
-    const suggestions_msg = buildSuggestionsMessage(suggestions.suggestions_parsed);
-    conflictSuggestions.innerHTML = suggestions_msg;
+      const suggestions_msg = buildSuggestionsMessage(
+        suggestions.suggestions_parsed,
+      );
+      conflictSuggestions.innerHTML = suggestions_msg;
     }
-    outputArea.style.display = !conflict && state.selected.length > 0 ? "block" : "none";
-    
+    outputArea.style.display =
+      !conflict && state.selected.length > 0 ? "block" : "none";
+
     if (!conflict && state.selected.length > 0) {
       const { release, compiler } = state.selected[0];
       const names = state.selected.map((m) => m.name).join(" ");
@@ -272,33 +282,34 @@ function buildSuggestionsMessage(suggestions_parsed) {
     alert("Command copied to clipboard!");
   });
 
-  document.addEventListener('click', function(event) {
-  const target = event.target.closest('.pkg-item');
+  document.addEventListener("click", function (event) {
+    const target = event.target.closest(".pkg-item");
 
-  // If a pkg-item was clicked
-  if (target) {
-    const cmdToCopy = target.getAttribute('data-pkg');
+    // If a pkg-item was clicked
+    if (target) {
+      const cmdToCopy = target.getAttribute("data-pkg");
 
-    if (cmdToCopy) {
-      // Copy to clipboard
-      navigator.clipboard.writeText(cmdToCopy).then(() => {
-        console.log('Copied to clipboard:', cmdToCopy);
-        
-        // Visual feedback
-        alert(`Copied loading command to clipboard:\n${cmdToCopy}`);
-        const originalBg = target.style.backgroundColor;
-        target.style.backgroundColor = '#9df3b1';
-        setTimeout(() => {
-           target.style.backgroundColor = originalBg;
-        }, 1000);
-        
+      if (cmdToCopy) {
+        // Copy to clipboard
+        navigator.clipboard
+          .writeText(cmdToCopy)
+          .then(() => {
+            console.log("Copied to clipboard:", cmdToCopy);
 
-      }).catch(err => {
-        console.error('Failed to copy text: ', err);
-      });
+            // Visual feedback
+            alert(`Copied loading command to clipboard:\n${cmdToCopy}`);
+            const originalBg = target.style.backgroundColor;
+            target.style.backgroundColor = "#9df3b1";
+            setTimeout(() => {
+              target.style.backgroundColor = originalBg;
+            }, 1000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy text: ", err);
+          });
+      }
     }
-  }
-});
+  });
 
   clearSelectionBtn.addEventListener("click", clearAllSelections);
 

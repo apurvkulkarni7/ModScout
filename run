@@ -37,7 +37,7 @@ case "${1:-}" in
     case "${2:-}" in
       development)
         echo "Starting development server (Flask)..."
-        python3 app.py
+        flask --app app run --debug --port $APP_PORT
         ;;
       production)
         echo "Starting production server (gunicorn)..."
@@ -64,7 +64,7 @@ case "${1:-}" in
   "")
     # No arguments → default to “start development”
     echo "No command supplied - defaulting to development mode."
-    python3 app.py
+    flask --app app run --debug --port $APP_PORT
     ;;
   *)
     usage

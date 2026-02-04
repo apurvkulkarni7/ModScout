@@ -1,0 +1,24 @@
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #1a1d23;
+  --background-color: #f7fafc;
+  --text-color: #6b7280;
+  --font-family: Arial, sans-serif;
+  --font-size-sm: 0.75rem;
+  --font-size-md: 0.875rem;
+  --font-size-lg: 1rem;
+  --border-radius: 0.25rem;
+  --box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+  --clear-button-bg: #fa7070;
+  --clear-button-hover-bg: #ffbbbb;
+
+
+  --title-bg-color: rgb(0, 37, 87);
+  --title-text-color: rgb(255, 255, 255);
+  
+  --nav-bg-color: rgb(0, 0, 0);
+  --nav-bg-color-active: rgb(49, 69, 94);
+
+  --footer-bg-color: rgb(0, 37, 87);
+}

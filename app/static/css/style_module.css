@@ -1,4 +1,5 @@
 /* Module page */
+@import url('./style_base.css');
 
 /* Layout Containers */
 body {
@@ -26,7 +27,6 @@ body {
 .search-input {
   color: #ffffff;
   width: 80%;
-  /* padding: 0.5rem; */
   border: none;
   border: 1px solid #cccccc;
   border-radius: 0.25rem 0 0 0.25rem;
@@ -36,8 +36,8 @@ body {
 
 .clear-button {
   padding: 0.6rem 1rem;
-  background-color: #626262;
-  border: 1px solid #626262;
+  background-color: var(--clear-button-bg);
+  border: 1px solid var(--clear-button-bg);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   color: #ffffff;
   border: none;
@@ -50,7 +50,7 @@ body {
 }
 
 .clear-button:hover {
-  background-color: #919191;
+  background-color: var(--clear-button-hover-bg);
 }
 
 .title-panel {
@@ -59,14 +59,13 @@ body {
   justify-content: center;
   justify-items: center;
   height: 80px;
-  background-color: #2f343a;
-  color: #ffffff;
+  background-color: var(--title-bg-color);
 }
 
 
 .global-nav {
   height: 50px;
-  background-color: #1a1d23;
+  background-color: var(--nav-bg-color);
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -100,14 +99,14 @@ body {
 h1 {
   font-size: 2rem;
   font-weight: bold;
-  color: #3498db;
+  color: var(--title-text-color);
   padding-left: 2rem;
 }
 
 .panel-header h1 {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #3498db;
+  color: var(--title-text-color);
   margin-bottom: 1rem;
 }
 
@@ -136,6 +135,7 @@ h1 {
   margin-bottom: 1rem;
   border-bottom: 1px solid #000000;
   padding-bottom: 0.25rem;
+  cursor: pointer;
 }
 
 .compiler-group {
@@ -298,7 +298,7 @@ h1 {
 /* Global Navigation */
 
 .nav-brand {
-  color: #3498db;
+  color: #ffffff;
   font-weight: bold;
   font-size: 1.2rem;
 }
@@ -328,11 +328,34 @@ a {
 .nav-links a:hover,
 .nav-links a.active {
   opacity: 1;
-  color: #3498db;
-  /* font-weight: bold; */
-  background-color: #4f4f4f;
+  color: #ffffff;
+  background-color: var(--nav-bg-color-active);
   display: flex;
   height: 100%;
   align-items: center;
   justify-content: center;
+}
+
+
+summary {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  cursor: pointer;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::before {
+  content: "➤";
+  color: #3498db;
+  margin-right: 10px;
+  transition: transform 0.2s;
+}
+
+details[open] summary::before {
+  transform: rotate(90deg);
+  color: #014760;
 }
