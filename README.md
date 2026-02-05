@@ -45,6 +45,8 @@ chmod +x run
   <video src="demo.mp4" width="500px" controls></video>
 </p>
 
+<video src="demo.mp4" width="320" height="240" controls></video>
+
 ## Configuration Reference (`.env.template` )
 
 The application reads its runtime settings from a **`.env`** file (created automatically from the template). Below is a description of each variable you may need to edit.
