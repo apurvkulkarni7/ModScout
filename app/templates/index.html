@@ -3,35 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZIH HPC Software Browser</title>
+    <title>ModScout</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_index.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_common.css') }}">
-    <script defer src="{{ url_for('static', filename='js/common.js') }}" ></script>
+    <script type="module" src="{{ url_for('static', filename='js/index.js') }}"></script>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
 </head>
 <body>
-    <main class="main">
-        <h1>ZIH HPC Module Browser</h1>
-        <div>Select an HPC System to explore the modules</div>
-        <div class="main-nav-grid">
-            <a href="/module?system=barnard" class="system-card">Barnard</a>
-            <a href="/module?system=romeo" class="system-card">Romeo</a>
-            <a href="/module?system=alpha" class="system-card">Alpha</a>
-            <a href="/module?system=capella" class="system-card">Capella</a>
+    <div class="title-panel header">
+        <a href="/" style="text-decoration: none;">
+            <h1>ModScout: The Lmod Module System Browser</h1>
+        </a>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; margin: 2rem;">
         </div>
-
-        <div class="status" id="status-display"></div>
-
-        <div class="info-section">
-            <a href="https://compendium.hpc.tu-dresden.de/software/modules/" class="info-btn">ℹ️ More information </a>
+    </div>
+    <div class="container">
+        <h2>Select an HPC system to explore the modules</h2>
+        <div id="main-nav-grid" class="main-nav-grid"></div>
+        <div class="update-status" id="status-display"></div>
+        <div class="info-container">
+            <a href="" class="info-btn">ℹ️ More information </a>
         </div>
-    </main>
-
-  
+    </div>
     <footer class="footer">
         <p>Copyright 2026 &copy;</p>
     </footer>
-
 </body>
 </html>

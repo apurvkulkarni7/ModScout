@@ -59,14 +59,26 @@ def module():
 @routes_bp.route("/module/data", methods=["GET"])
 def module_data():
     system = request.args.get("system")
-    file_path = os.path.join(current_app.config["CUSTOM_CONFIG"].data_dir, f"processed_module_{system}.json")
-    return send_file(file_path, mimetype="application/json")
+    try:
+        file_path = os.path.join(current_app.config["CUSTOM_CONFIG"].data_dir, f"processed_module_{system}.json")
+        return send_file(file_path, mimetype="application/json")
+    except FileNotFoundError:
+        return jsonify({"error": "Data file not found"}), 404  
+    
+@routes_bp.route("/module/system_list", methods=["GET"])
+def module_system_list():
+    try:
+        systems = list(current_app.config["CUSTOM_CONFIG"].systems.keys())
+        return jsonify({"systems": systems})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @routes_bp.route("/module/search", methods=["GET"])
 def search_module():
     system = request.args.get("system")
     search_query = request.args.get("query", "")
+
     data = get_data_dictionary(system)
 
     filtered_data = search(data, search_query)
@@ -77,11 +89,13 @@ def search_module():
 def conflict_check():
     data = request.get_json(force=True)
     selected_modules = data.get("selected", [])
+    system = data.get("system", "")
+    
     conflict, msg = has_conflict(selected_modules)
 
     if conflict:
-        all_modules = get_data_dictionary(system="barnard")
-        suggestions = suggestions(selected_modules, all_modules)
+        all_modules = get_data_dictionary(system=system)
+        suggestions_list = suggestions(selected_modules, all_modules)
     else:
-        suggestions = {}
-    return jsonify({"conflict": conflict, "msg": msg, "suggestions": suggestions})
+        suggestions_list = []
+    return jsonify({"conflict": conflict, "msg": msg, "suggestions": suggestions_list})

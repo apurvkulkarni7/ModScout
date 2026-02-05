@@ -16,6 +16,7 @@ def get_data_dictionary(system):
         with open(file_path, "r") as f:
             data = json.load(f)
         cfg.data_dictionary[system] = data
+        # print(f"Data dictionary for {system} loaded.")
     return cfg.data_dictionary.get(system, {})
 
 
@@ -212,13 +213,9 @@ def has_conflict(selected):
     if len(selected) < 2:
         return False, ""
 
-    with open("selected.json", "w") as f:
-        json.dump(selected, f, indent=2)
-
     # For different release
     for m_i, m_ii in combinations(selected, 2):
         if get_release(m_i) != get_release(m_ii):
-            print("Releases differ among selected modules.")
             return True, "Modules must share the same releases."
 
     # If releases are same

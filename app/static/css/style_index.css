@@ -1,37 +1,38 @@
-.main {
+/* External Imports & Variables */
+@import url("./style_base.css");
+
+.container {
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 2rem;
+  height: 100%;
 }
-.main h1 {
+h2 {
   font-size: 2.5rem;
   color: #2f343a;
   margin: 3rem;
-  margin-top: 30vh;
 }
-.main-subtitle {
-  color: #6b7280;
-  margin-bottom: 3rem;
-  font-size: 1.1rem;
-}
+
 .main-nav-grid {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   gap: 1.5rem;
   margin-top: 2rem;
 }
 @media (min-width: 768px) {
   .main-nav-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(1, 1fr);
     max-width: 900px;
     gap: 1.5rem;
   }
 }
-.system-card {
+.system-card a {
   background: white;
   padding: 2rem 1rem;
   border-radius: 0.5rem;
@@ -52,7 +53,14 @@
   border-color: #3498db;
   color: #3498db;
 }
-.info-section {
+
+.update-status {
+  margin-top: 1rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.info-container {
   margin-top: 4rem;
 }
 .info-btn {
@@ -62,10 +70,9 @@
   padding: 0.75rem 1.5rem;
   border-radius: 2rem;
   transition: 0.2s;
-   text-decoration: none;
+  text-decoration: none;
 }
 .info-btn:hover {
   background: #3498db;
   color: white;
 }
-

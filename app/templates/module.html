@@ -5,29 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ModScout</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_module.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_common.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <script defer src="{{ url_for('static', filename='js/module.js') }}"></script>
-    <script defer src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/module.js') }}"></script>
 </head>
 
 <body class="body">
     <div class="title-panel header">
-        <h1>ModScout: The Lmod Browser</h1>
+        <a href="/" style="text-decoration: none;">
+            <h1>ModScout: The Lmod Module System Browser</h1>
+        </a>
         <div style="display: flex; flex-direction: column; align-items: flex-end; margin: 2rem;">
             <div class="status" id="status-display"></div>
         </div>
     </div>
 
-
-    <nav class="global-nav">
+    <nav id="global-nav" class="global-nav">
         <div class="nav-links"><a href="/">Home</a></div>
-        <div class="nav-links"><a href="/module?system=barnard">Barnard</a></div>
-        <div class="nav-links"><a href="/module?system=romeo">Romeo</a></div>
-        <div class="nav-links"><a href="/module?system=alpha">Alpha</a></div>
-        <div class="nav-links"><a href="/module?system=capella">Capella</a></div>
     </nav>
 
     <div class="app-container">
@@ -60,19 +54,19 @@
 
             <div id="selectionList" class="selection-list"></div>
 
-            <div id="hint" class="hint" style="display: block; font-size: small; margin-top: auto; margin-bottom: 0;">
 
-                <div id="outputArea" class="output-area" style="display: none;">
-                    <div style="font-size: 1rem;margin-bottom: 1rem;">Run the following command to load the modules:
-                    </div>
-                    <div id="copyCmdBox" class="command-box">
-                        <code id="commandText"></code>
-                    </div>
-                    <p class="hint">Click to copy</p>
+            <div id="outputArea" class="output-area" style="display: none;">
+                <div style="font-size: 1rem;margin-bottom: 1rem;">Run the following command to load the modules (Click
+                    to copy):
                 </div>
-                Hint: Some modules require <strong>release</strong> and <strong>GCC</strong>/<strong>GCCore</strong> to
-                be loaded first.
+                <div id="copyCmdBox" class="command-box">
+                    <code id="commandText"></code>
+                </div>
+                <p class="hint">Hint: Some modules require <strong>release</strong> and
+                    <strong>GCC</strong>/<strong>GCCore</strong> to
+                    be loaded first.</p>
             </div>
+
         </aside>
     </div>
 
