@@ -41,8 +41,9 @@ chmod +x run
 ```
 
 ## Demo: ModScout Web Interface
-![ModScout demo GIF](./demo.mp4)
-
+<p align="center">
+  <video src="demo.mp4" width="500px" controls></video>
+</p>
 
 ## Configuration Reference (`.env.template` )
 
