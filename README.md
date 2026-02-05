@@ -56,8 +56,6 @@ The application reads its runtime settings from a **`.env`** file (created autom
 | `SYSTEM_1_HOST`                  | `hpc.example.edu`          | Hostname or IP of the first HPC system.                                                                             |
 | `SYSTEM_2_NAME`, `SYSTEM_2_HOST` | …                          | Additional systems follow the same pattern (`SYSTEM_2_NAME`, `SYSTEM_2_HOST`, etc.). You can add as many as needed. |
 
----
-
 ## API
 
 The Routes API lets you retrieve routing information such as directions, distance, and estimated travel time.
