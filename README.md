@@ -242,6 +242,9 @@ All endpoints accept **GET** requests and return JSON.
     }
   }
   ```
+## TODO
+- Supporting extension modules. Currently the extension modules are not extracted using command present in the Flask App.
+- Containerization using docker.
 
 ## License
 
