@@ -40,6 +40,10 @@ chmod +x run
 ./run update # calls /update route
 ```
 
+## Demo: ModScout Web Interface
+![ModScout demo GIF](./demo.mp4)
+
+
 ## Configuration Reference (`.env.template` )
 
 The application reads its runtime settings from a **`.env`** file (created automatically from the template). Below is a description of each variable you may need to edit.
