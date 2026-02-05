@@ -16,7 +16,6 @@ def get_data_dictionary(system):
         with open(file_path, "r") as f:
             data = json.load(f)
         cfg.data_dictionary[system] = data
-        # print(f"Data dictionary for {system} loaded.")
     return cfg.data_dictionary.get(system, {})
 
 

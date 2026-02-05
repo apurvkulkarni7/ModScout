@@ -50,7 +50,7 @@ def get_status():
     return jsonify({"status": job_status, "last_run": last_run})
 
 
-@routes_bp.route("/module")
+@routes_bp.route("/module",methods=["GET"])
 def module():
     system = request.args.get("system")
     return render_template("module.html", system=system)
@@ -78,9 +78,7 @@ def module_system_list():
 def search_module():
     system = request.args.get("system")
     search_query = request.args.get("query", "")
-
     data = get_data_dictionary(system)
-
     filtered_data = search(data, search_query)
     return jsonify(filtered_data)
 
@@ -90,9 +88,7 @@ def conflict_check():
     data = request.get_json(force=True)
     selected_modules = data.get("selected", [])
     system = data.get("system", "")
-    
     conflict, msg = has_conflict(selected_modules)
-
     if conflict:
         all_modules = get_data_dictionary(system=system)
         suggestions_list = suggestions(selected_modules, all_modules)
