@@ -2,7 +2,7 @@
 
 ## Overview
 
-`ModScout` is a Flask‑based web application that browses **Lmod** module systems, checks for module‑load conflicts, and suggests alternative modules when conflicts occur.  
+`ModScout` is a Flask‑based web application that browses **Lmod** module systems, checks for module‑load conflicts, and suggests alternative modules when conflicts occur.
 
 ## Quick Start
 
@@ -41,6 +41,7 @@ chmod +x run
 ```
 
 ## Demo: ModScout Web Interface
+
 ![demo](./demo.gif)
 
 ## Configuration Reference (`.env.template` )
@@ -61,8 +62,6 @@ The application reads its runtime settings from a **`.env`** file (created autom
 
 ## API
 
-The Routes API lets you retrieve routing information such as directions, distance, and estimated travel time.
-
 All endpoints accept **GET** requests and return JSON.
 
 ### General Endpoints
@@ -79,7 +78,7 @@ All endpoints accept **GET** requests and return JSON.
 | **GET** `/module/system_list` | List all systems that are configured in the app.                                                |
 | **GET** `/module/data`        | Serve the pre‑processed JSON file that contains the full module tree for a system.              |
 | **GET** `/module/search`      | Search modules on a given system.                                                               |
-| **GET** `/module/conflict`    | Check a selected set of modules for load conflicts and, if any, return alternative suggestions. |
+| **POST** `/module/conflict`   | Check a selected set of modules for load conflicts and, if any, return alternative suggestions. |
 
 #### **GET** `/module/system_list`
 
@@ -159,7 +158,7 @@ All endpoints accept **GET** requests and return JSON.
   }
   ```
 
-#### **GET** `/module/conflict`
+#### **POST** `/module/conflict`
 
 - **Query parameter**
 
@@ -242,7 +241,9 @@ All endpoints accept **GET** requests and return JSON.
     }
   }
   ```
+
 ## TODO
+
 - Supporting extension modules. Currently the extension modules are not extracted using command present in the Flask App.
 - Containerization using docker.
 
