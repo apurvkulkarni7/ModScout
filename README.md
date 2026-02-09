@@ -84,7 +84,7 @@ All endpoints accept **GET** requests and return JSON.
 
 - Example
   ```bash
-  curl -X GET "https://api.example.com/module/system_list"
+  curl -X GET "https://your‑domain.com/module/system_list"
   ```
 - Output
   ```json
@@ -103,7 +103,7 @@ All endpoints accept **GET** requests and return JSON.
 
 - Example
   ```bash
-  curl -X GET "https://api.example.com/module/data?system=system1"
+  curl -X GET "https://your‑domain.com/module/data?system=system1"
   # Output: The full json file for system1
   ```
 
@@ -128,10 +128,10 @@ All endpoints accept **GET** requests and return JSON.
 - Example
 
   ```bash
-  curl -X GET "https://api.example.com/module/search?system=system1\&query=module1"
-  curl -X GET "https://api.example.com/module/search?system=system1\&query=module1/"
-  curl -X GET "https://api.example.com/module/search?system=system1&query=module1/v2"
-  curl -X GET "https://api.example.com/module/search?system=system1&query=module1/v2,module2"
+  curl -X GET "https://your‑domain.com/module/search?system=system1\&query=module1"
+  curl -X GET "https://your‑domain.com/module/search?system=system1\&query=module1/"
+  curl -X GET "https://your‑domain.com/module/search?system=system1&query=module1/v2"
+  curl -X GET "https://your‑domain.com/module/search?system=system1&query=module1/v2,module2"
   ```
 
 - **Output**
@@ -168,7 +168,7 @@ All endpoints accept **GET** requests and return JSON.
 
 - Example
   ```bash
-    curl -X GET "https://api.example.com/module/conflict" \
+    curl -X POST "https://your‑domain.com/module/conflict" \
     -H "Content-Type: application/json" \
     -d '{
         "system": "<system-name>",          // e.g. "system1"
