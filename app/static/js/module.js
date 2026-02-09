@@ -274,12 +274,12 @@ document.addEventListener("DOMContentLoaded", () => {
     state.selected.forEach((mod) => {
       const item = document.createElement("div");
       item.className = "selected-item";
-      const meta =
+      const compiler =
         mod.compiler === "" ? mod.release : `${mod.release} ${mod.compiler}`;
       item.innerHTML = `
                 <div style="align-items: left;">
                     <div class="item-name">${mod.package}/${mod.version}</div>
-                    <div class="item-meta">${meta}</div>
+                    <div class="item-compiler">${compiler}</div>
                     <div class="item-description">${mod.description || ""}</div>
                     <a class="item-description" href="${mod.url || ""}">${mod.url || ""}</a>
                 </div>

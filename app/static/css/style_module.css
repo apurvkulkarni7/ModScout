@@ -188,10 +188,17 @@
   font-size: 0.875rem;
   color: #1a1d23;
 }
+
+.item-compiler {
+  font-size: 0.75rem;
+  color: #3e4553;
+  margin-top: 0.4rem;
+}
+
 .item-description {
   font-size: 0.625rem;
   color: #2e4b89;
-  margin-top: 0.3rem;
+  margin-top: 0.4rem;
 }
 
 /* Alerts & Commands */
