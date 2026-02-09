@@ -143,7 +143,7 @@
 
 .pkg-name {
   font-weight: bold;
-  font-size: (0.6rem, 0.875rem, 1rem);
+  font-size: clamp(0.6rem, 0.875rem, 1rem);
   margin-right: 0.5rem;
   white-space: nowrap;
 }
