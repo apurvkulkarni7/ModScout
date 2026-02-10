@@ -68,8 +68,8 @@ All endpoints accept **GET** requests and return JSON.
 
 | HTTP Method & Path | Description                                                                     | Example                               |
 | ------------------ | ------------------------------------------------------------------------------- | ------------------------------------- |
-| **GET** `/update`  | Kick‑off an asynchronous update of the module cache for each configured system. | `curl https://your‑domain.com/update` |
-| **GET** `/status`  | Return the current status of the background update jobs.                        | `curl https://your‑domain.com/status` |
+| **GET** `/update`  | Kick‑off an asynchronous update of the module cache for each configured system. | `curl -X GET https://your‑domain.com/update` |
+| **GET** `/status`  | Return the current status of the background update jobs.                        | `curl -X GET https://your‑domain.com/status` |
 
 ### Module Information Endpoints
 
