@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const commandText = document.getElementById("commandText");
   const clearSelectionBtn = document.getElementById("clearSelectionBtn");
 
-
   //////////////////////////////////////////////////////////////////////////////
   //  Helper functions
   //////////////////////////////////////////////////////////////////////////////
@@ -30,8 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
   async function init() {
     const urlParams = new URLSearchParams(window.location.search);
     const systemName = urlParams.get("system") || "processed_module_rapids"; // Default fallback
-
-    updateNav();
 
     fetchJson(`/module/data?system=${systemName}`)
       .then((data) => {
@@ -75,22 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ selected: selectedModules, system: system }),
-    })
-
-      return data;
-  }
-
-  function updateNav() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentSystem = urlParams.get("system");
-
-    document.querySelectorAll(".nav-links a").forEach((link) => {
-      if (link.href.includes(`system=${currentSystem}`)) {
-        link.classList.add("active");
-      } else {
-        link.classList.remove("active");
-      }
     });
+
+    return data;
   }
 
   // Building suggestion message upon conflict
@@ -190,6 +174,18 @@ document.addEventListener("DOMContentLoaded", () => {
           navLinksDiv.appendChild(div);
         });
       })
+      .then(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSystem = urlParams.get("system");
+        document.querySelectorAll(".nav-links a").forEach((link) => {
+          if (link.href.includes(`system=${currentSystem}`)) {
+            link.classList.add("active");
+            console.log("Current system:", currentSystem);
+          } else {
+            link.classList.remove("active");
+          }
+        });
+      })
       .catch((error) => console.error("Error fetching system names:", error));
   }
 
@@ -198,8 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const query = state.search;
     const urlParams = new URLSearchParams(window.location.search);
     const systemName = urlParams.get("system");
-    fetchJson(`/module/search?system=${systemName}&query=${query}`)
-      .then((data) => {
+    fetchJson(`/module/search?system=${systemName}&query=${query}`).then(
+      (data) => {
         resultsArea.innerHTML = "";
         const sortedReleases_key = Object.keys(data).sort().reverse();
         const sortedReleases = sortedReleases_key.map((key) => [
@@ -229,32 +225,61 @@ document.addEventListener("DOMContentLoaded", () => {
           sortedCompilerEntries.forEach((compiler_item) => {
             let compiler = compiler_item[0];
             let modules = compiler_item[1];
+            
+            
 
-            if (compiler.toLowerCase() === "none" || compiler.trim() === "") {
-              compiler = "Standalone";
+            if (!compiler.toUpperCase().endsWith("_EXT")) {
+              if (compiler.toLowerCase() === "none" || compiler.trim() === "") {
+                compiler = "Standalone";
+              }
+
+              const group = document.createElement("div");
+              group.className = "compiler-group";
+              group.innerHTML = `<h3>${compiler}</h3>`;
+
+              const grid = document.createElement("div");
+              grid.className = "module-grid";
+              modules.forEach((mod) => {
+                const btn = document.createElement("button");
+                btn.className = `module-card ${isSelected(mod) ? "selected" : ""}`;
+                btn.innerHTML = `<span class="pkg-name">${mod.package}</span><span class="pkg-ver">${mod.version}</span>`;
+                btn.onclick = () => toggleModule(mod);
+                grid.appendChild(btn);
+              });
+
+              group.appendChild(grid);
+              section.appendChild(group);
+            } else if (compiler.toUpperCase().endsWith("_EXT")) {
+              compiler = compiler.replace("_EXT","").replace("_Ext","")
+              const group = document.createElement("div");
+              group.className = "compiler-group";
+              group.innerHTML = `<h3>Extenstions - ${compiler}</h3>`;
+
+              const grid = document.createElement("div");
+              grid.className = "module-grid";
+              modules.forEach((mod) => {
+                const btn = document.createElement("button");
+                btn.className = `module-card extension ${isSelected(mod) ? "selected" : ""}`;
+                btn.innerHTML = `
+                <span class="pkg-name">${mod.package} <span class="floating-alpha">(E)</span></span>
+                <span class="pkg-ver">${mod.version}</span>
+                `;
+                btn.onclick = () => toggleModule(mod);
+                grid.appendChild(btn);
+              });
+
+              group.appendChild(grid);
+              section.appendChild(group);
+              
             }
 
-            const group = document.createElement("div");
-            group.className = "compiler-group";
-            group.innerHTML = `<h3>${compiler}</h3>`;
 
-            const grid = document.createElement("div");
-            grid.className = "module-grid";
-            modules.forEach((mod) => {
-              const btn = document.createElement("button");
-              btn.className = `module-card ${isSelected(mod) ? "selected" : ""}`;
-              btn.innerHTML = `<span class="pkg-name">${mod.package}</span><span class="pkg-ver">${mod.version}</span>`;
-              btn.onclick = () => toggleModule(mod);
-              grid.appendChild(btn);
-            });
-
-            group.appendChild(grid);
-            section.appendChild(group);
           });
           // section.innerHTML = `<details ${true ? 'open' : ''}>${section.innerHTML}</details>`;
           resultsArea.appendChild(section);
         });
-      });
+      },
+    );
   }
 
   // Rendering selected modules and conflict status
@@ -276,15 +301,32 @@ document.addEventListener("DOMContentLoaded", () => {
       item.className = "selected-item";
       const compiler =
         mod.compiler === "" ? mod.release : `${mod.release} ${mod.compiler}`;
-      item.innerHTML = `
+      if (mod.is_extension === false) {
+        item.innerHTML = `
                 <div style="align-items: left;">
                     <div class="item-name">${mod.package}/${mod.version}</div>
                     <div class="item-compiler">${compiler}</div>
-                    <div class="item-description">${mod.description || ""}</div>
-                    <a class="item-description" href="${mod.url || ""}">${mod.url || ""}</a>
+                    <div style="direction: rtl; padding: 0.5rem; max-height: 100px; overflow-y: scroll;">
+                      <div class="item-description">${mod.description || ""}</div>
+                    </div>
                 </div>
                 <button class="remove-btn">✕</button>
             `;
+      } else if (mod.is_extension === true) {
+        item.innerHTML = `
+                <div style="align-items: left;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <div class="item-name">${mod.package}/${mod.version}</div>
+                      <div class="item-compiler" style="color: #666;"> (Extension) </div>
+                    </div>
+                    <div class="item-compiler">${compiler.slice(0,-4)}</div>
+                    <div style="direction: rtl; padding: 0.5rem; max-height: 50px; overflow-y: scroll;">
+                      <div class="item-description">${mod.description || ""}</div>
+                    </div>
+                </div>
+                <button class="remove-btn">✕</button>
+            `;
+      }
       item.querySelector(".remove-btn").onclick = () => toggleModule(mod);
       selectionList.appendChild(item);
     });
@@ -307,8 +349,20 @@ document.addEventListener("DOMContentLoaded", () => {
       !conflict && state.selected.length > 0 ? "block" : "none";
 
     if (!conflict && state.selected.length > 0) {
-      const { release, compiler } = state.selected[0];
-      const names = state.selected.map((m) => m.name).join(" ");
+      let { release, compiler } = state.selected[0];
+
+      const names = state.selected
+        .map((m) => {
+          if (m.is_extension == false) {
+            return m.name;
+          }
+        })
+        .join(" ");
+      
+      if (compiler.toUpperCase().endsWith("_EXT")) {
+        compiler = compiler.replace("_Ext", "");
+        compiler = compiler.replace("_EXT", "");
+      }
       commandText.textContent = `module load ${release} ${compiler} ${names}`;
     }
   }

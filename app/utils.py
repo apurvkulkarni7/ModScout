@@ -7,6 +7,7 @@ from itertools import combinations, product
 import threading
 from flask import app, current_app
 import schedule
+import re
 
 
 def get_data_dictionary(system):
@@ -20,25 +21,36 @@ def get_data_dictionary(system):
 
 
 def process_data(system_name):
-    with open(
-        os.path.join(
-            current_app.config["CUSTOM_CONFIG"].data_dir, f"raw_{system_name}.json"
-        ),
-        "r",
-    ) as f:
+    system_data_file = os.path.join(
+        current_app.config["CUSTOM_CONFIG"].data_dir, f"raw_{system_name}.json"
+    )
+    
+    with open(system_data_file, "r",) as f:
         raw_data = json.load(f)
 
     tree = {}
     for entry in raw_data:
         package = entry["package"]
-        description = entry.get("description", "No description available.")
+        # description = entry.get("description", "No description available.")
         url = entry.get("url", "No URL available.").strip()
         for version in entry["versions"]:
             v_name = version["versionName"]
             full_name = f"{package}/{v_name}"
+
+            extenstions = version.get("provides", [])
+
+            description = version.get("help", "No description available.") \
+                                .replace("\n", " ") \
+                                .replace("\r", " ").strip() \
+                                .replace("  ", " ").strip()
+            description = re.sub(r"^Description =========== ", r"Description\n===========\n", description, flags=re.IGNORECASE)
+            description = re.sub(r" More information ================ ", r"\n\nMore information\n================\n", description, flags=re.IGNORECASE)
+            description = re.sub(r" Included extensions ===================.*", r"\n\nIncluded extensions\n===================\n", description, flags=re.IGNORECASE)
+            description = description + f"{"\n".join(extenstions)}"
+
             for parent_set in version.get("parent", []):
                 release = parent_set[0] if len(parent_set) > 0 else "Core"
-                compiler = " ".join(parent_set[1:]) if len(parent_set) > 1 else "None"
+                compiler = " ".join(parent_set[1:]) if len(parent_set) > 1 else ""
 
                 if release not in tree:
                     tree[release] = {}
@@ -53,10 +65,47 @@ def process_data(system_name):
                         "description": description,
                         "url": url,
                         "release": release,
-                        "compiler": compiler.replace("None", ""),
-                        "load_cmd": f"module load {release} {compiler.replace('None', '')} {full_name}",
+                        "compiler": compiler,
+                        "load_cmd": f"module load {release} {compiler} {full_name}",
+                        # "extension_list": extenstions,
+                        "is_extension": False,
                     }
                 )
+
+            if len(extenstions) == 0:
+                continue
+            else:
+                if compiler != "":
+                    extension_compiler = f"{compiler} {full_name}_Ext"
+                else:
+                    extension_compiler = f"{full_name}_Ext"
+            
+                if extension_compiler not in tree[release]:
+                    tree[release][extension_compiler] = []
+                
+                for extension_i in extenstions:    
+                    if extension_i not in tree[release][extension_compiler]:
+                        extension_package = extension_i.split("/")
+                        if len(extension_package) > 1:
+                            extension_package_full = extension_package[0]
+                            extension_version = extension_package[1]
+                        else:
+                            extension_package_full = extension_i
+                            extension_version = ""
+                        tree[release][extension_compiler].append(
+                            {
+                                "package": extension_package_full,
+                                "version": extension_version,
+                                "name": extension_i,
+                                "description": f"This is an extension automatically available by loading {full_name} module.",
+                                "url": "",
+                                "release": release,
+                                "compiler": extension_compiler,
+                                "parent": full_name,
+                                "is_extension": True,
+                                "load_cmd": f"module load {release} {compiler} {full_name}"
+                            }
+                        )
 
     with open(
         os.path.join(
@@ -294,9 +343,7 @@ def find_module_variant_mpackage(selected, all_modules):
             # print(f"Checking release: {release_i}, compiler: {compiler_i}")  # Debug print
 
             modules_in_bucket = all_modules[release_i][compiler_i]
-            modules_in_bucket += all_modules[release_i][
-                "None"
-            ]  # Include 'None' compiler modules from same release
+            modules_in_bucket += all_modules[release_i][""]  # Include 'None' compiler modules from same release
             # Group available modules by package name
             # Example: {'gcc': ['gcc/9.1', 'gcc/9.2', 'gcc/9.3'], 'llvm': ['llvm/10', 'llvm/11']}
             candidates = {name: [] for name in required_pkg_names}

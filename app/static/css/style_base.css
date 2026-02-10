@@ -13,12 +13,15 @@
   --clear-button-bg: #fa7070;
   --clear-button-hover-bg: #ffbbbb;
 
+  --title-height: 80px;
   --title-bg-color: rgb(0, 37, 87);
   --title-text-color: rgb(255, 255, 255);
 
+  --nav-height: 50px;
   --nav-bg-color: rgb(0, 0, 0);
   --nav-bg-color-active: rgb(49, 69, 94);
 
+  --footer-height: 50px;
   --footer-bg-color: rgb(0, 37, 87);
 }
 
@@ -35,7 +38,7 @@ body {
 .title-panel {
   display: flex;
   align-items: center;
-  height: 80px;
+  height: var(--title-height);
   background-color: var(--title-bg-color);
   text-decoration: none;
 }
@@ -59,5 +62,5 @@ body {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 50px;
+  height: var(--footer-height);
 }

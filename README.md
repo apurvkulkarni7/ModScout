@@ -104,7 +104,7 @@ All endpoints accept **GET** requests and return JSON.
 - Example
   ```bash
   curl -X GET "https://your‑domain.com/module/data?system=system1"
-  # Output: The full json file for system1
+  # Output: The full json file content for system1
   ```
 
 #### **GET** `/module/search`
@@ -128,8 +128,8 @@ All endpoints accept **GET** requests and return JSON.
 - Example
 
   ```bash
-  curl -X GET "https://your‑domain.com/module/search?system=system1\&query=module1"
-  curl -X GET "https://your‑domain.com/module/search?system=system1\&query=module1/"
+  curl -X GET "https://your‑domain.com/module/search?system=system1&query=module1"
+  curl -X GET "https://your‑domain.com/module/search?system=system1&query=module1/"
   curl -X GET "https://your‑domain.com/module/search?system=system1&query=module1/v2"
   curl -X GET "https://your‑domain.com/module/search?system=system1&query=module1/v2,module2"
   ```

@@ -9,7 +9,7 @@
 
 /* Navigation & Headers */
 .global-nav {
-  height: 50px;
+  height: var(--nav-height);
   background-color: var(--nav-bg-color);
   display: flex;
   align-items: center;
@@ -125,7 +125,7 @@
   justify-content: center;
   height: 2.5rem;
   padding: 0 0.75rem;
-  background-color: #ffffff;
+  background-color: lightblue;
   border: 1px solid #9c9c9c;
   border-radius: 0.25rem;
 }
@@ -134,10 +134,17 @@
   transform: scale(0.97);
 }
 
-.module-card.selected {
+.module-card.selected, .module-card.extension.selected {
   background-color: #3498db;
   color: #ffffff;
   border-color: #3498db;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.module-card.extension {
+  background-color: #bdbdbd;
+  color: #000000;
+  border-color: #000000;
   box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
@@ -153,6 +160,12 @@
   font-family: monospace;
 }
 
+.floating-alpha {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #585858;
+}
+
 /* Sidebar & Selection Details */
 .selection-panel {
   width: 30vw;
@@ -161,7 +174,8 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  max-height: 80vh;
+  max-height: calc(100vh - var(--footer-height)- var(--title-height)- var(--nav-height));
+  margin-bottom: 50px;
 }
 
 .sidebar-title {
@@ -199,7 +213,12 @@
   font-size: 0.625rem;
   color: #2e4b89;
   margin-top: 0.4rem;
+  white-space: pre-wrap;
+  direction: ltr;
 }
+
+
+
 
 /* Alerts & Commands */
 .alert-box,
